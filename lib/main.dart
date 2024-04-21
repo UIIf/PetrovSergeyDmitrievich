@@ -1,14 +1,23 @@
-import 'dart:ui';
 
-import 'package:flutter/cupertino.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
+import 'package:temp_application/generated/locale_keys.g.dart';
 import 'dart:math';
 
-void main() {
-  runApp(const MyApp());
+
+void main() async {
+
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await EasyLocalization.ensureInitialized();
+  runApp(
+    EasyLocalization(
+      supportedLocales: const [Locale('ru'), Locale('en')],
+      path: 'assets/translations',
+      fallbackLocale: const Locale('en'),
+      child: const MyApp()
+    )
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -18,23 +27,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
@@ -63,13 +60,13 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   List<String> citates = [
-      'Если волк молчит, то лучше его не перебивать',
-     'Если тебя обсуждают за спиной, значит ты впереди',
-     'Волк слабее льва и тигра но в цырке не выступает',
-     'Ты живешь как карта ляжет, я жвиу как мама скажет',
-     'Работа не волк, работа ворк',
+      LocaleKeys.citate_1,
+      LocaleKeys.citate_2,
+      LocaleKeys.citate_3,
+      LocaleKeys.citate_4,
+      LocaleKeys.citate_5,
     ];
-  String citate = "Обычная волчья цитата";
+  String cur_citate = LocaleKeys.default_citate;
 
   void _changeCitate() {
     setState(() {
@@ -78,10 +75,9 @@ class _MyHomePageState extends State<MyHomePage> {
       // so that the display can reflect the updated values. If we changed
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
-      citate = citates[Random().nextInt(citates.length)];
+      cur_citate = citates[Random().nextInt(citates.length)];
     });
   }
-
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -98,7 +94,7 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Text("Мнгновенофото"),
+        title: Text(LocaleKeys.app_name.tr()),
       ),
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
@@ -125,15 +121,34 @@ class _MyHomePageState extends State<MyHomePage> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                        Text("$citate"),
-                        TextButton(
-                          onPressed: _changeCitate,
-                          child: Icon(
-                            Icons.play_arrow, 
-                            size:  20,
-                            color: Color.fromARGB(255, 233, 134, 28)
-                          )
-                        ),
+                        Text("${cur_citate.tr()}"),
+                        Row(
+                          children: [
+                            TextButton(
+                              onPressed:() {
+                                if (context.locale == const Locale("ru")){
+                                  context.setLocale(const Locale("en"));
+                                } else {
+                                  context.setLocale(const Locale("ru"));
+                                }
+                              },
+                              child: const Icon(
+                                Icons.flag,
+                                size:20,
+                                color: Color.fromARGB(255, 233, 133, 28)
+                              )
+                            ),
+                            TextButton(
+                                  onPressed: _changeCitate,
+                                  child: const Icon(
+                                    Icons.play_arrow,
+                                      size: 20,
+                                      color:Color.fromARGB(255, 233, 134, 28)
+                                  )
+                            ),
+                          ],
+                        )
+                        
                       ],)
                     ]),
                 ],)
@@ -158,7 +173,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               height: 50,
                               width:400,
                               color:Color.fromARGB(255, 85, 118, 235),
-                              child:const Text("Живопись русских комуналок", style: TextStyle(fontWeight: FontWeight.bold),),  
+                              child: Text(LocaleKeys.public_name.tr(), style: TextStyle(fontWeight: FontWeight.bold),),  
                             ),
                             Icon(Icons.landscape, size:300),
                             Container(
